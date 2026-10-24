@@ -30,10 +30,17 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Card
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -41,14 +48,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.example.woof.data.Dog
 import com.example.woof.data.dogs
 import com.example.woof.ui.theme.WoofTheme
-import androidx.compose.material3.Card
+import androidx.compose.material3.ExperimentalMaterial3Api
+
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             WoofTheme {
-                // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize()
                 ) {
@@ -60,41 +67,81 @@ class MainActivity : ComponentActivity() {
 }
 
 /**
- * Composable that displays an app bar and a list of dogs.
+ * Composable that displays the top app bar and the list of dogs.
  */
-
 @Composable
 fun WoofApp() {
-    LazyColumn {
-        items(dogs) { dog ->
-            DogItem(
-                dog = dog,
-                modifier = Modifier.padding(
-                    dimensionResource(R.dimen.padding_small)
+    Scaffold(
+        topBar = {
+            WoofTopAppBar()
+        }
+    ) { paddingDeLaBarra ->
+        LazyColumn(
+            contentPadding = paddingDeLaBarra
+        ) {
+            items(dogs) { dog ->
+                DogItem(
+                    dog = dog,
+                    modifier = Modifier.padding(
+                        dimensionResource(R.dimen.padding_small)
+                    )
                 )
-            )
+            }
         }
     }
 }
 
-
 /**
- * Composable that displays a list item containing a dog icon and their information.
- *
- * @param dog contains the data that populates the list item
- * @param modifier modifiers to set to this composable
+ * Composable that displays the app bar with the Woof logo and title.
  */
 
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun WoofTopAppBar(modifier: Modifier = Modifier) {
+    CenterAlignedTopAppBar(
+        modifier = modifier,
+        title = {
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Image(
+                    modifier = Modifier
+                        .size(dimensionResource(R.dimen.image_size))
+                        .padding(
+                            dimensionResource(R.dimen.padding_small)
+                        ),
+                    painter = painterResource(R.drawable.ic_woof_logo),
+                    contentDescription = null
+                )
+
+                Text(
+                    text = stringResource(R.string.app_name),
+                    style = MaterialTheme.typography.displayLarge
+                )
+            }
+        }
+    )
+}
+
+
+/**
+ * Composable that displays a list item containing a dog icon and its information.
+ */
 @Composable
 fun DogItem(
     dog: Dog,
     modifier: Modifier = Modifier
 ) {
-    Card(modifier = modifier) {
+    Card(
+        modifier = modifier
+    ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(dimensionResource(R.dimen.padding_small))
+                .padding(
+                    dimensionResource(R.dimen.padding_small)
+                )
         ) {
             DogIcon(dog.imageResourceId)
             DogInformation(dog.name, dog.age)
@@ -102,12 +149,8 @@ fun DogItem(
     }
 }
 
-
 /**
  * Composable that displays a photo of a dog.
- *
- * @param dogIcon is the resource ID for the image of the dog
- * @param modifier modifiers to set to this composable
  */
 @Composable
 fun DogIcon(
@@ -117,22 +160,16 @@ fun DogIcon(
     Image(
         modifier = modifier
             .size(dimensionResource(R.dimen.image_size))
-            .padding(dimensionResource(R.dimen.padding_small)),
+            .padding(dimensionResource(R.dimen.padding_small))
+            .clip(MaterialTheme.shapes.small),
+        contentScale = ContentScale.Crop,
         painter = painterResource(dogIcon),
-
-        // Content Description is not needed here - image is decorative, and setting a null content
-        // description allows accessibility services to skip this element during navigation.
-
         contentDescription = null
     )
 }
 
 /**
  * Composable that displays a dog's name and age.
- *
- * @param dogName is the resource ID for the string of the dog's name
- * @param dogAge is the Int that represents the dog's age
- * @param modifier modifiers to set to this composable
  */
 @Composable
 fun DogInformation(
@@ -140,19 +177,29 @@ fun DogInformation(
     dogAge: Int,
     modifier: Modifier = Modifier
 ) {
-    Column(modifier = modifier) {
+    Column(
+        modifier = modifier
+    ) {
         Text(
             text = stringResource(dogName),
-            modifier = Modifier.padding(top = dimensionResource(R.dimen.padding_small))
+            modifier = Modifier.padding(
+                top = dimensionResource(R.dimen.padding_small)
+            ),
+            style = MaterialTheme.typography.displayMedium
         )
+
         Text(
-            text = stringResource(R.string.years_old, dogAge),
+            text = stringResource(
+                R.string.years_old,
+                dogAge
+            ),
+            style = MaterialTheme.typography.bodyLarge
         )
     }
 }
 
 /**
- * Composable that displays what the UI of the app looks like in light theme in the design tab.
+ * Preview of the app in light theme.
  */
 @Preview
 @Composable
@@ -161,3 +208,27 @@ fun WoofPreview() {
         WoofApp()
     }
 }
+
+/**
+ * Preview of the app in dark theme.
+ */
+@Preview
+@Composable
+fun WoofDarkThemePreview() {
+    WoofTheme(darkTheme = true) {
+        WoofApp()
+    }
+}
+
+/*
+ * Aplicación del diseño a una lista de gastos que yo haria:
+ *
+ * 1. Utilizaría tarjetas para separar visualmente cada gasto
+ *    y facilitar su lectura.
+ *
+ * 2. Usaría textos con distintos tamaños y pesos para
+ *    distinguir el nombre del gasto, la categoría y el monto.
+ *
+ * 3. Aplicaría colores con buen contraste para identificar
+ *    rápidamente la información importante.
+ */
